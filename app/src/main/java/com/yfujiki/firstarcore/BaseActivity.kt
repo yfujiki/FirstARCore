@@ -16,9 +16,18 @@ import android.support.v4.content.ContextCompat.getSystemService
 import android.app.ActivityManager
 import android.os.Build
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Point
+import android.net.Uri
 import android.support.v4.app.FragmentActivity
 import android.util.Log
+import android.view.View
+import com.google.ar.core.Anchor
+import com.google.ar.core.Plane
+import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.rendering.ModelRenderable
+import com.google.ar.sceneform.ux.TransformableNode
 
 
 class BaseActivity : AppCompatActivity() {
@@ -71,5 +80,69 @@ class BaseActivity : AppCompatActivity() {
             return false
         }
         return true
+    }
+
+    fun onPlaceObject(view: View) {
+        val frame = fragment.arSceneView.arFrame
+        val point = getScreenCenter()
+        if (frame != null) {
+            val hits = frame.hitTest(point.x.toFloat(), point.y.toFloat())
+            for (hit in hits) {                 // iterate through HitResults that you tapped
+                val trackable = hit.trackable   // HitResult.trackable is either Face/Image/Plane or Point
+                if (trackable is Plane && trackable.isPoseInPolygon(hit.hitPose)) {
+                    // Magic spell to check whether the hit point was the plane you wanted
+                    placeObject(fragment, hit.createAnchor(), Uri.parse("Heart.sfb"))
+                    break
+                }
+            }
+        }
+    }
+
+//    private fun addNodeToScene(fragment: ArFragment, createAnchor: Anchor, renderable: ModelRenderable) {
+//        val anchorNode = AnchorNode(createAnchor)
+//
+//        val transformableNode = TransformableNode(fragment.transformationSystem)
+//        transformableNode.renderable = renderable
+//        transformableNode.setParent(anchorNode)
+//
+//        fragment.arSceneView.scene.addChild(anchorNode)
+//        transformableNode.select()
+//    }
+
+    private fun addNodeToScene(fragment: ArFragment, createAnchor: Anchor, renderable: ModelRenderable) {
+        val anchorNode = AnchorNode(createAnchor)
+        val rotatingNode = RotatingNode(fragment.transformationSystem)
+
+//        val transformableNode = TransformableNode(fragment.transformationSystem)
+
+        rotatingNode.renderable = renderable
+
+//        rotatingNode.addChild(transformableNode)
+        rotatingNode.setParent(anchorNode)
+
+        fragment.arSceneView.scene.addChild(anchorNode)
+        rotatingNode.select()
+    }
+
+    private fun placeObject(fragment: ArFragment, createAnchor: Anchor, model: Uri) {
+        ModelRenderable.builder()
+            .setSource(fragment.context, model)
+            .build()
+            .thenAccept {
+                addNodeToScene(fragment, createAnchor, it)
+            }
+            .exceptionally {
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage(it.message)
+                    .setTitle("error!")
+                val dialog = builder.create()
+                dialog.show()
+                return@exceptionally null
+            }
+    }
+
+    private fun getScreenCenter(): android.graphics.Point {
+        val vw = findViewById<View>(android.R.id.content)
+        return Point(vw.width / 2, vw.height / 2)
     }
 }
