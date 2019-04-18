@@ -90,12 +90,15 @@ class RotatingNode(transformationSystem: TransformationSystem) : TransformableNo
         // Node's setLocalRotation method accepts Quaternions as parameters.
         // First, set up orientations that will animate a circle.
         val orientation1 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 0f)
-        val orientation2 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 120f)
-        val orientation3 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 240f)
-        val orientation4 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 360f)
+        val orientation2 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 60f)
+        val orientation3 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 120f)
+        val orientation4 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 180f)
+        val orientation5 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 240f)
+        val orientation6 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 300f)
+        val orientation7 = Quaternion.axisAngle(Vector3(0.0f, 1.0f, 0.0f), 300f)
 
         val rotationAnimation = ObjectAnimator()
-        rotationAnimation.setObjectValues(orientation1, orientation2, orientation3, orientation4)
+        rotationAnimation.setObjectValues(orientation1, orientation2, orientation3, orientation4, orientation5, orientation6, orientation7)
 
         // Next, give it the localRotation property.
         rotationAnimation.propertyName = "localRotation"
